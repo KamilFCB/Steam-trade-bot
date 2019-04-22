@@ -1,27 +1,27 @@
-let SteamTotp = require('steam-totp');
-let SteamTradeOffers = require('steam-tradeoffers');
-let mysql = require('mysql');
-let SteamCommunity = require('steamcommunity');
-let TradeOfferManager = require('steam-tradeoffer-manager');
+let SteamTotp = require("steam-totp");
+let SteamTradeOffers = require("steam-tradeoffers");
+let mysql = require("mysql");
+let SteamCommunity = require("steamcommunity");
+let TradeOfferManager = require("steam-tradeoffer-manager");
 
 
-const admin = ''; // main account steam id
-const sharedSecret = ''; // bot's account shared secret
-const identitySecret = ''; // bot's account identity secret
-const apiKey = ''; // bot's account api key
+const admin = ""; // main account steam id
+const sharedSecret = ""; // bot's account shared secret
+const identitySecret = ""; // bot's account identity secret
+const apiKey = ""; // bot's account api key
 
 let logOnOptions = {
-    accountName: '', //bot's steam account login
-    password: '', // bot's steam account password
+    accountName: "", //bot's steam account login
+    password: "", // bot's steam account password
     twoFactorCode: SteamTotp.generateAuthCode(sharedSecret)
 };
 
 const mysqlInfo = {
-    host: '',
-    user: '',
-    password: '',
-    database: '',
-    charset: 'utf8_general_ci'
+    host: "",
+    user: "",
+    password: "",
+    database: "",
+    charset: "utf8_general_ci"
 };
 
 let mysqlConnection = mysql.createPool(mysqlInfo);
@@ -71,7 +71,7 @@ let offers = new SteamTradeOffers();
         }
     });
 
-    community.chatLogon(500, 'web');
+    community.chatLogon(500, "web");
     community.loggedIn((err, loggedIn) => {
         if(err)
             console.log(err);
@@ -107,7 +107,7 @@ function confirmOffer() {
 }
 
 // offers accepting
-manager.on('newOffer', function(offer){
+manager.on("newOffer", function(offer){
     if (offer.state === 2)
     {
         if (offer.partner.getSteamID64() === admin)
@@ -122,7 +122,7 @@ manager.on('newOffer', function(offer){
     }
 });
 
-manager.on('unknownOfferSent', (offer) => {
+manager.on("unknownOfferSent", (offer) => {
     console.log("New offer sent");
     switch (offer.state)
     {
@@ -145,18 +145,18 @@ manager.on('unknownOfferSent', (offer) => {
         case 8:
         case 10:
             mysqlConnection.query("UPDATE `droped` SET `status`= 0 WHERE `hash` = '" + offer.message + "';", () => {});
-            console.log('Offer rejected');
+            console.log("Offer rejected");
             break;
         case 3:
             mysqlConnection.query("UPDATE `droped` SET `status`= 4 WHERE `hash` = '" + offer.message + "';", () => {});
-            console.log('Offer accepted');
+            console.log("Offer accepted");
             break;
         default:
             console.log("ERROR");
     }
 });
 
-manager.on('sentOfferChanged', (offer) => {
+manager.on("sentOfferChanged", (offer) => {
     switch (offer.state)
     {
         case 4:
@@ -178,11 +178,11 @@ manager.on('sentOfferChanged', (offer) => {
         case 8:
         case 10:
             mysqlConnection.query("UPDATE `droped` SET `status`= 0 WHERE `hash` = '" + offer.message + "';", () => {});
-            console.log('Offer rejected');
+            console.log("Offer rejected");
             break;
         case 3:
             mysqlConnection.query("UPDATE `droped` SET `status`= 4 WHERE `hash` = '" + offer.message + "';", () => {});
-            console.log('Offer accepted');
+            console.log("Offer accepted");
             break;
         default:
             console.log("ERROR");
@@ -190,7 +190,7 @@ manager.on('sentOfferChanged', (offer) => {
 });
 
 function sendOffers() {
-    mysqlConnection.query('SELECT droped.id, droped.hash, steam_connect.partnerId, steam_connect.token, item.name, droped.status FROM `droped` JOIN steam_connect ON droped.uid=steam_connect.uid JOIN item ON droped.item_id=item.id where droped.status=2 AND item.sell_price > 5 AND steam_connect.partnerId != "" AND steam_connect.token != ""', (err, row) => {
+    mysqlConnection.query("SELECT droped.id, droped.hash, steam_connect.partnerId, steam_connect.token, item.name, droped.status FROM `droped` JOIN steam_connect ON droped.uid=steam_connect.uid JOIN item ON droped.item_id=item.id where droped.status=2 AND item.sell_price > 5 AND steam_connect.partnerId != '' AND steam_connect.token != '';", (err, row) => {
         if(err) {
             console.log(err);
             return;
@@ -228,7 +228,7 @@ function sendOffers() {
                                 return;
                             }
                             mysqlConnection.query("UPDATE `droped` SET `status`=3 WHERE `id`='" +sendId+ "';", () => {});
-                            console.log('Trade offer for queue '+sendId+' sent!');
+                            console.log("Trade offer for queue "+sendId+" sent!");
                         });
                         break;
                     }
