@@ -1,5 +1,4 @@
 let SteamTotp = require('steam-totp');
-let Steam = require('steam');
 let SteamTradeOffers = require('steam-tradeoffers');
 let mysql = require('mysql');
 let SteamCommunity = require('steamcommunity');
@@ -32,7 +31,7 @@ mysqlConnection.getConnection((err) => {
         console.log(err);
         reconnect(mysqlConnection);
     }
-})
+});
 
 function reconnect(connection) {
     connection = mysql.createPool(mysqlInfo);
@@ -49,7 +48,6 @@ let community = new SteamCommunity();
 let manager = new TradeOfferManager({
     "community": community
 });
-let steam = new Steam.SteamClient();
 let offers = new SteamTradeOffers();
 
 (function loginIn() {
@@ -79,7 +77,7 @@ let offers = new SteamTradeOffers();
             console.log(err);
         if(loggedIn)
             console.log("Logged in");
-    })
+    });
 })();
 
 
@@ -229,7 +227,7 @@ function sendOffers() {
                                 console.log(err);
                                 return;
                             }
-                            mysqlConnection.query("UPDATE `droped` SET `status`=3 WHERE `id`='" +gamenum+ "';", () => {});
+                            mysqlConnection.query("UPDATE `droped` SET `status`=3 WHERE `id`='" +sendId+ "';", () => {});
                             console.log('Trade offer for queue '+sendId+' sent!');
                         });
                         break;
