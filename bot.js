@@ -58,17 +58,19 @@ let offers = new SteamTradeOffers();
         }
         else {
             community.oAuthLogin(steamguard, oAuthToken, (err) => {
-                if (err)
+                if (err) {
                     console.log(err);
+                }
             });
             offers.setup({
                 sessionID,
                 webCookie: cookies,
                 APIKey: apiKey
             },  (err) => {
-                if (err)
+                if (err) {
                     console.log(err);
-                });
+                }
+            });
             manager.setCookies(cookies);
         }
     });
@@ -82,7 +84,7 @@ let offers = new SteamTradeOffers();
             console.log("Logged in");
         }
     });
-})();
+}());
 
 
 function confirmOffer() {
