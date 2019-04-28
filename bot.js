@@ -30,15 +30,16 @@ function reconnect(connection) {
     connection = mysql.createPool(mysqlInfo);
 
     connection.getConnection((err) => {
-        if(err)
+        if(err) {
             setTimeout(reconnect(connection), 2000);
+        }
         
         return connection;
     });
 }
 
 mysqlConnection.getConnection((err) => {
-    if(err){
+    if(err) {
         console.log(err);
         reconnect(mysqlConnection);
     }
@@ -46,21 +47,22 @@ mysqlConnection.getConnection((err) => {
 
 let community = new SteamCommunity();
 let manager = new TradeOfferManager({
-    "community": community
+    community
 });
 let offers = new SteamTradeOffers();
 
 (function loginIn() {
     community.login(logOnOptions, (err, sessionID, cookies, steamguard, oAuthToken) => {
-        if (err)
+        if (err) {
             console.log(err);
+        }
         else {
             community.oAuthLogin(steamguard, oAuthToken, (err) => {
                 if (err)
                     console.log(err);
             });
             offers.setup({
-                sessionID: sessionID,
+                sessionID,
                 webCookie: cookies,
                 APIKey: apiKey
             },  (err) => {
@@ -73,10 +75,12 @@ let offers = new SteamTradeOffers();
 
     community.chatLogon(500, "web");
     community.loggedIn((err, loggedIn) => {
-        if(err)
+        if(err) {
             console.log(err);
-        if(loggedIn)
+        }
+        if(loggedIn) {
             console.log("Logged in");
+        }
     });
 })();
 
@@ -87,16 +91,13 @@ function confirmOffer() {
     let allowKey = SteamTotp.getConfirmationKey(identitySecret, time, "allow");
 
     community.getConfirmations(time, confKey, (err, confirmations) => {
-        if(err)
-        {
+        if(err) {
             console.log(err);
             return;
         }
-        for(let confirmation of confirmations)
-        {
+        for(let confirmation of confirmations) {
             confirmation.respond(time, allowKey, true, (err) => {
-                if(err)
-                {
+                if(err) {
                     console.log(err);
                     return;
                 }
@@ -107,16 +108,16 @@ function confirmOffer() {
 }
 
 // offers accepting
-manager.on("newOffer", function(offer){
-    if (offer.state === 2)
-    {
-        if (offer.partner.getSteamID64() === admin)
-        {
+manager.on("newOffer", function(offer) {
+    if (offer.state === 2) {
+        if (offer.partner.getSteamID64() === admin) {
             offer.accept(function(err, status){
-                if(err)
+                if(err) {
                     console.log(err);
-                else
+                }
+                else {
                     console.log("Offer accepted, status: " + status);
+                }
             });
         }
     }
@@ -124,16 +125,17 @@ manager.on("newOffer", function(offer){
 
 manager.on("unknownOfferSent", (offer) => {
     console.log("New offer sent");
-    switch (offer.state)
-    {
+    switch (offer.state) {
         case 4:
         case 2:
         case 9:
             community.loggedIn((err, loggedIn) => {
-            if(err)
-                console.log(err);
-            if(loggedIn)
-                confirmOffer();
+                if(err) {
+                    console.log(err);
+                }
+                if(loggedIn) {
+                    confirmOffer();
+                }
             });
             mysqlConnection.query("UPDATE `droped` SET `status`= 3 WHERE `hash` = '" + offer.message + "';", () => {});
             console.log("Accepted");
@@ -157,16 +159,17 @@ manager.on("unknownOfferSent", (offer) => {
 });
 
 manager.on("sentOfferChanged", (offer) => {
-    switch (offer.state)
-    {
+    switch (offer.state) {
         case 4:
         case 2:
         case 9:
             community.loggedIn((err, loggedIn) => {
-            if(err)
-                console.log(err);
-            if(loggedIn)
-                confirmOffer();
+                if(err) {
+                    console.log(err);
+                }
+                if(loggedIn) {
+                    confirmOffer();
+                }
             });
             mysqlConnection.query("UPDATE `droped` SET `status`= 3 WHERE `hash` = '" + offer.message + "';", () => {});
             console.log("Accepted");
@@ -195,8 +198,9 @@ function sendOffers() {
             console.log(err);
             return;
         }
-        if(row.length === 0)
+        if(row.length === 0) {
             return;
+        }
 
         manager.getInventoryContents(730, 2, false, (err, inventory) => {
             if(err) {
@@ -210,7 +214,7 @@ function sendOffers() {
                 
                 for(let skin of inventory) {
                     if(skin.name === elem.name && skin.tradable) {
-                        item[0]={
+                        item[0] = {
                             appid: 730,
                             contextid: 2,
                             amount: skin.amount,
