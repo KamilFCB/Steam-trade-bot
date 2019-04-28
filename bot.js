@@ -26,13 +26,6 @@ const mysqlInfo = {
 
 let mysqlConnection = mysql.createPool(mysqlInfo);
 
-mysqlConnection.getConnection((err) => {
-    if(err){
-        console.log(err);
-        reconnect(mysqlConnection);
-    }
-});
-
 function reconnect(connection) {
     connection = mysql.createPool(mysqlInfo);
 
@@ -43,6 +36,13 @@ function reconnect(connection) {
         return connection;
     });
 }
+
+mysqlConnection.getConnection((err) => {
+    if(err){
+        console.log(err);
+        reconnect(mysqlConnection);
+    }
+});
 
 let community = new SteamCommunity();
 let manager = new TradeOfferManager({
@@ -92,9 +92,9 @@ function confirmOffer() {
             console.log(err);
             return;
         }
-        for(let i=0; i<confirmations.length; i++)
+        for(let confirmation of confirmations)
         {
-            confirmations[i].respond(time, allowKey, true, (err) => {
+            confirmation.respond(time, allowKey, true, (err) => {
                 if(err)
                 {
                     console.log(err);
@@ -204,24 +204,24 @@ function sendOffers() {
                 return;
             }
 
-            for(let z=0; z < row.length; z++) {
+            for(let elem of row) {
                 let item = [];
-                let sendId = row[z].id;
+                let sendId = elem.id;
                 
-                for(let i=0; i < inventory.length; i++) {
-                    if(inventory[i].name === row[z].name && inventory[i].tradable) {
+                for(let skin of inventory) {
+                    if(skin.name === elem.name && skin.tradable) {
                         item[0]={
                             appid: 730,
                             contextid: 2,
-                            amount: inventory[i].amount,
-                            assetid: inventory[i].assetid
+                            amount: skin.amount,
+                            assetid: skin.assetid
                         };
                         offers.makeOffer ({
-                            partnerAccountId: row[z].partnerId,
+                            partnerAccountId: elem.partnerId,
                             itemsFromMe: item,
-                            accessToken: row[z].token,
+                            accessToken: elem.token,
                             itemsFromThem: [],
-                            message: row[z].hash
+                            message: elem.hash
                         }, (err) => {
                             if(err) {
                                 console.log(err);
